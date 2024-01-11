@@ -104,7 +104,7 @@ def users():
     return response
 
 
-@app.route('/reviews/<int:id>', methods=['GET', 'DELETE'])
+@app.route('/reviews/<int:id>', methods=['GET', 'DELETE', 'PATCH'])
 def review_by_id(id):
     review= Review.query.filter(Review.id == id).first()
     if request.method == 'GET':
@@ -116,6 +116,24 @@ def review_by_id(id):
         )
 
         return response
+
+
+    elif request.method == 'PATCH':
+        for attr in request.form:
+            setattr(review, attr, request.form.get(attr))
+
+        db.session.add(review)
+        db.session.commit()
+
+        review_dict = review.to_dict()
+
+        response = make_response(
+            review_dict,
+            200
+        )
+
+        return response
+
 
     elif request.method == 'DELETE':
         db.session.delete(review)
@@ -132,12 +150,7 @@ def review_by_id(id):
         )
 
         return response
-
-
-
-
-
-
-
+  
+    
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
